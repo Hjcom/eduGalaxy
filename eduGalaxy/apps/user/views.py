@@ -449,6 +449,7 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
 
     def get_object(self):
         profile = get_object_or_404(Profile, pk=self.request.user.pk)
+        print(profile)
 
         return profile
 
