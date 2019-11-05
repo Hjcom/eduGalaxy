@@ -52,7 +52,8 @@ class EdUserCreationForm(forms.Form):
         choices=EMAIL_LIST,
         attrs={
                 'id': 'select',
-                'onchange': 'Change_Email();'}
+                'onchange': 'Change_Email();',
+            }
         )
     )
 

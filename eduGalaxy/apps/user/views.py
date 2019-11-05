@@ -509,6 +509,12 @@ class ParentUpdateView(UpdateView, LoginRequiredMixin):
     template_name = 'user/mypage/update_parent.html'
     success_url = reverse_lazy('user:update_profile')
 
+    def get_object(self):
+        parent = get_object_or_404(Parent, pk=self.request.user.pk)
+
+        return parent
+
+
     def get_child(self):
         self.kwargs.update({'pk': self.request.user.pk})
         parent = self.get_object()
@@ -622,7 +628,6 @@ class ChildUpdateView(UpdateView, LoginRequiredMixin):
             .exclude(status='재학중')
 
         return edu_level
-
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
