@@ -71,7 +71,7 @@
                         <a href="#">학교정보</a>
                     </li>
                     <li>
-                        <a href="#">리뷰</a>
+                        <a href="{% url 'school:review_list' pk=post.pk %}">리뷰</a>
                     </li>
                 </ul>
             </div>
@@ -83,7 +83,7 @@
                     {% include 'school/admin_detail_body.html' %}
                 </div>
                 <div class="userDetail-body">
-                    {% include 'school/user_detail.html' %}
+                    {% include 'school/review_simple_list.html' %}
                 </div>
             </div>
             <div class="col-sm-3">
