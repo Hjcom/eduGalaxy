@@ -1,89 +1,80 @@
-{% extends 'school/base.html' %}
+{% extends 'user/mypage/update_base.html' %}
+{% load static %}
 
-{% block gbody %}
-<form name="update_profile_form" action="." method="post" enctype="multipart/form-data"> {% csrf_token %}
+{% block mypage_gbody %}
+<form name="parent_form" action="." method="post"> {% csrf_token %}
     <div class="container">
-<!--        {% if profile.group == '학생' %}-->
-<!--            <a href="{% url 'user:update_student' %}">학생 세부정보</a>-->
-<!--        {% elif profile.group == '학교 관계자' %}-->
-<!--            <a href="{% url 'user:update_school_auth' %}">관계자 세부정보</a>-->
-<!--        {% elif profile.group == '학부모' %}-->
-<!--            <a href="{% url 'user:update_parent' %}">학부모 세부정보</a>-->
-<!--        {% else %}-->
-<!--            <h1>error</h1>-->
-<!--        {% endif %}-->
-<!--        <h2>프로필 변경</h2>-->
-<!--        <div class="panel-group">-->
-<!--            <div class="panel panel-primary">-->
-<!--                <div class="panel-heading">기본정보 변경</div>-->
-<!--                <div class="panel-body">-->
-<!--                    <table>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.phone.label_tag }}</td>-->
-<!--                            <td>{{ form.phone }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.receive_email.label_tag }}</td>-->
-<!--                            <td>{{ form.receive_email }}</td>-->
-<!--                        </tr>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            {% if group == 0 %}-->
-<!--            <div class="panel panel-primary">-->
-<!--                <div class="panel-heading">학생정보변경</div>-->
-<!--                <a href="{% url 'user:update_edulevel' pk=user.pk %}">학력 수정</a>-->
-<!--                <div class="panel-body">-->
-<!--                    <table>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.school.label_tag }}</td>-->
-<!--                            <td>{{ form.school }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.grade.label_tag }}</td>-->
-<!--                            <td>{{ form.grade }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.age.label_tag }}</td>-->
-<!--                            <td>{{ form.age }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.address1.label_tag }}</td>-->
-<!--                            <td>{{ form.address1 }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.address2.label_tag }}</td>-->
-<!--                            <td>{{ form.address2 }}</td>-->
-<!--                        </tr>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            {% elif group == 1 %}-->
-<!--            <div class="panel panel-primary">-->
-<!--                <div class="panel-heading">학교 관계자 정보변경</div>-->
-<!--                <div class="panel-body">-->
-<!--                    <table>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.school.label_tag }}</td>-->
-<!--                            <td>{{ form.school }}<br><br></td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.auth_doc.label_tag }}</td>-->
-<!--                            <td>{{ form.auth_doc }}</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>{{ form.tel.label_tag }}</td>-->
-<!--                            <td>{{ form.tel }}</td>-->
-<!--                        </tr>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            {% endif %}-->
+        <div class="panel panel-default">
+            <h3>학부모 정보 변경</h3>
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">자녀 정보
+                        <a href="{% url 'user:add_child' %}">
+                            <button type="button" class="btn btn-success">자녀 정보 추가</button>
+                        </a>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>다니는 학교</th>
+                                <th>학년</th>
+                                <th>나이</th>
+                                <th>성별</th>
+                                <th>비고</th>
+                            </tr>
+                            </thead>
+                            {% for child in children %}
+                            <tbody>
+                            <tr>
+                                <td>{{ child.school }}</td>
+                                <td>{{ child.grade }}</td>
+                                <td>{{ child.age }}</td>
+                                <td>{{ child.gender }}</td>
+                                <td>
+                                    <a href="{% url 'user:update_child' pk=child.pk %}">
+                                        <button type="button" class="btn btn-primary btn-xs" name="child_update">변경</button>
+                                    </a>
+                                    <a href="{% url 'user:delete_child' pk=child.pk %}">
+                                        <button type="button" class="btn btn-danger btn-xs" name="child_delete">제거</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">주소 정보 변경</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {{ form.address1.label_tag }}
+                            </div>
+                            <div class="col-sm-6">
+                                {{ form.address1 }}
+                                <input type="button" onclick="address_search()" class="btn btn-success" value="주소 검색">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                {{ form.address2.label_tag }}
+                            </div>
+                            <div class="col-sm-6">
+                                {{ form.address2 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="form-actions">
-        <button class="btn btn-primary" type="submit">변경</button>
-        <button class="btn btn-danger" onclick="history.back(-1);">취소</button>
+        <button class="btn btn-primary" name="save" type="submit">변경</button>
+        <button class="btn btn-danger" onclick="history.back(-1);">뒤로가기</button>
     </div>
 </form>
-{% endblock gbody %}
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script src="{% static 'user/js/sign_up.js' %}" type="text/javascript"></script>
+{% endblock mypage_gbody %}

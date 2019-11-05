@@ -6,37 +6,37 @@
                 <h4 style="margin-bottom: 2px;">
                     <strong>설립구분</strong>
                 </h4>
-                {{ admin_post.school_info.sch_estab_div }}
+                {{ post.info.estab_div }}
             </div>
             <div class="col-sm-4" style="float: left;">
                 <h4 style="margin-bottom: 2px;">
                     <strong>공학구분</strong>
                 </h4>
-                {{ admin_post.school_info.sch_gonghak }}
+                {{ post.info.gender_div }}
             </div>
             <div class="col-sm-4" style="float: left;">
                 <h4 style="margin-bottom: 2px;">
                     <strong>학교특성</strong>
                 </h4>
-                {{ admin_post.school_info.sch_char }}
+                {{ post.info.char }}
             </div>
         </div>
         <hr>
-        <strong>주야구분</strong> {{ admin_post.school_info.sch_day_n_night }}<br>
-        <strong>개교기념일</strong> {{ admin_post.school_info.sch_anniversary }}<br>
-        <strong>설립일</strong> {{ admin_post.school_info.sch_estab_date }}
+        <strong>주야구분</strong> {{ post.info.day_n_night }}<br>
+        <strong>개교기념일</strong> {{ post.info.anniversary }}<br>
+        <strong>설립일</strong> {{ post.info.estab_date }}
         <hr>
         <div class="row">
             <div class="col-sm-8" style="float: left;">
-                <strong>주소</strong> {{ admin_post.school_info.sch_address1 }} {{ admin_post.school_info.sch_address2 }}<br>
-                <strong>도로명주소</strong> {{ admin_post.school_info.sch_address1_st }} {{ admin_post.school_info.sch_address2_st }}<br>
-                <strong>우편번호</strong> {{ admin_post.school_info.sch_zip_code }}<br>
-                <strong>도로명 우편번호</strong> {{ admin_post.school_info.sch_zip_code_st }}<br>
+                <strong>주소</strong> {{ post.info.address1 }} {{ post.info.address2 }}<br>
+                <strong>도로명주소</strong> {{ post.info.address1_st }} {{ post.info.address2_st }}<br>
+                <strong>우편번호</strong> {{ post.info.zip_code }}<br>
+                <strong>도로명 우편번호</strong> {{ post.info.zip_code_st }}<br>
             </div>
             <div class="col-sm-4" style="float: right;">
-                <strong>전화번호</strong> {{ admin_post.school_info.sch_phone }}<br>
-                <strong>팩스번호</strong> {{ admin_post.school_info.sch_fax }}<br>
-                <strong>홈페이지 주소</strong> <a href="{{ admin_post.school_info.sch_homepage }}">{{ admin_post.school_info.sch_homepage }}</a>
+                <strong>전화번호</strong> {{ post.info.phone }}<br>
+                <strong>팩스번호</strong> {{ post.info.fax }}<br>
+                <strong>홈페이지 주소</strong> <a href="{{ post.info.homepage }}">{{ post.info.homepage }}</a>
             </div>
         </div>
     </div>

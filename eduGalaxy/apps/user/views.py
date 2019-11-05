@@ -18,9 +18,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from .mixins import VerificationEmailMixin
 
 from apps.user.forms import EdUserCreationForm, ProfileCreationForm, StudentCreationForm, SchoolAuthCreationForm, \
-    ParentCreationForm, ChildCreationForm, EduLevelFormset
+    ParentForm, ChildForm, EduLevelFormset, EduLevelForm
 from apps.user.forms import ProfileUpdateForm, StudentUpdateForm, SchoolAuthUpdateForm, PasswordChangeForm
-from apps.user.models import EdUser, Temp, Profile, Student, SchoolAuth, Parent, EduLevel, TempChild
+from apps.user.models import EdUser, Temp, Profile, Student, SchoolAuth, Parent, EduLevel, TempChild, Child
 
 import os
 
@@ -66,6 +66,10 @@ class ProfileCreateView(FormView):
 
     def get(self, request, *args, **kwargs):
         return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+    def post(self, request, *args, **kwargs):
+        print(request.POST)
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         temp = self.get_object()
@@ -141,9 +145,10 @@ class StudentCreateView(FormView):
 # 학부모 정보 입력
 class ParentCreateView(CreateView):
     model = Parent
-    form_class = ParentCreationForm
+    form_class = ParentForm
     template_name = "user/create_parent.html"
 
+    # 해당 자녀 데이터 필터(TempChild)
     def get_child(self):
         pk = self.kwargs['pk']
         temp = get_object_or_404(Temp, id=pk)
@@ -168,16 +173,59 @@ class ParentCreateView(CreateView):
         # Profile save
         profile = temp.profile_save()
 
+        # 학부모 정보 저장
+        parent = form.save(commit=False)
+        parent.profile = profile
+        parent.save()
+
+        # tempchild 불러온 후 리스트형으로 변경
+        child_query = self.get_child()
+        children = list(child_query.values())
+
+        # 자녀 정보 저장
+        for child in children:
+            child_data = Child(
+                parent = parent,
+                school = child['school'],
+                grade = int(child['grade']),
+                age = int(child['age']),
+                gender = child['gender']
+            )
+            child_data.save()
+
+            # 재학중인 학력 데이터 저장
+            now_edulevel = EduLevel(
+                school = child_data.school,
+                status = "재학중",
+                child = child_data
+            )
+            now_edulevel.save()
+
+            # 졸업한 학력 데이터 저장
+            child_edulevel = child['edulevel'].split('|')
+            for edulevel in child_edulevel:
+                finish_edulevel = EduLevel(
+                    school = edulevel,
+                    status = "졸업",
+                    child = child_data
+                )
+                finish_edulevel.save()
+
         # Temp delete
         temp_object = temp.get_object()
+
+        temp_children = self.get_child()
+        for temp_child in temp_children:
+            temp_child.delete()
+
         temp_object.delete()
 
         return HttpResponseRedirect(reverse_lazy('user:result', kwargs={'pk': eduser.id}))
 
 
-# 자녀 정보 입력 뷰
-class ChildCreateView(FormView):
-    form_class = ChildCreationForm
+# 자녀 정보 입력 뷰 - Tempchild
+class TempChildCreateView(FormView):
+    form_class = ChildForm
     template_name = "user/create_child.html"
 
     def get_object(self):
@@ -193,17 +241,57 @@ class ChildCreateView(FormView):
 
     def get(self, request, *args, **kwargs):
         kwargs.update({'formsets': self.get_formset()})
+        print(self.get_formset())
         return render(self.request, self.template_name, self.get_context_data(**kwargs))
 
-    def form_valid(self, form):
-        temp = self.get_object()
-        temp_child = form.child_data()
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        formsets = EduLevelFormset(self.request.POST)
 
+        print(request.POST)
+        print(form.is_valid())
+
+        if form.is_valid():
+            if formsets.is_valid():
+                return self.formset_valid(form, formsets)
+            else:
+                return self.formset_invalid(form, formsets)
+        else:
+            return self.formset_invalid(form, formsets)
+
+    def formset_valid(self, form, formsets):
+        edulevel_list = []
+        school = form.cleaned_data.get('school')
+
+        # 졸업한 학교 리스트로 변경
+        for formset in formsets:
+            edulevel = formset.cleaned_data.get('edulevel')
+            # 다니는 학교하고 다를 경우 리스트 값 추가
+            if school != edulevel:
+                edulevel_list.append(edulevel)
+
+        # 리스트 중복 값 제거
+        edulevel_list = list(set(edulevel_list))
+        if None in edulevel_list:
+            edulevel_list.remove(None)
+        # 리스트에서 문자열로 변환 (|으로 조인)
+        str_edulevel = '|'.join(edulevel_list)
+        temp = self.get_object()
+
+        # 자녀 데이터 모델에 저장
+        temp_child = form.create_child()
+        temp_child.edulevel = str_edulevel
         temp_child.temp = temp
         temp_child.save()
 
         return HttpResponseRedirect(reverse_lazy('user:parent', kwargs={'pk': temp.id}))
 
+    def formset_invalid(self, form, formsets):
+        context = {
+            'form': form,
+            'formsets': formsets
+        }
+        return self.render_to_response(context)
 
 # 자녀 정보 삭제 뷰
 class TempChildDeleteView(RedirectView):
@@ -361,6 +449,7 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
 
     def get_object(self):
         profile = get_object_or_404(Profile, pk=self.request.user.pk)
+        print(profile)
 
         return profile
 
@@ -414,17 +503,212 @@ class SchoolAuthUpdateView(UpdateView, LoginRequiredMixin):
         return super().form_valid(form)
 
 
-# class ParentUpdateView(UpdateView, LoginRequiredMixin):
-#     model = Parent
-#     form_class = ParentUpdateForm
-#     context_object_name = 'parent'
-#     template_name = 'user/mypage/update_profile.html'
-#     success_url = reverse_lazy('user:update_profile')
-#
-#     def get_object(self):
-#         parent = get_object_or_404(Parent, pk=self.request.user.pk)
-#
-#         return parent
+class ParentUpdateView(UpdateView, LoginRequiredMixin):
+    model = Parent
+    form_class = ParentForm
+    context_object_name = 'parent'
+    template_name = 'user/mypage/update_parent.html'
+    success_url = reverse_lazy('user:update_profile')
+
+    def get_child(self):
+        self.kwargs.update({'pk': self.request.user.pk})
+        parent = self.get_object()
+        child = Child.objects.filter(parent_id=parent.pk)
+
+        return child
+
+    def get(self, request, *args, **kwargs):
+        kwargs.update({'children': self.get_child(),
+                       'parent': self.get_object()})
+        self.object = self.get_object()
+        return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+
+class ChildAddView(CreateView, LoginRequiredMixin):
+    model = Child
+    form_class = ChildForm
+    template_name = "user/mypage/add_child.html"
+
+    def get_parent(self):
+        return get_object_or_404(Parent, pk=self.request.user.pk)
+
+    def get_formset(self):
+        if self.request.method == 'POST':
+            formset = EduLevelFormset(self.request.POST)
+        else:
+            formset = EduLevelFormset()
+        return formset
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        kwargs.update({'formsets': self.get_formset(),
+                       'parent': self.get_parent()})
+        return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        form = self.get_form()
+        formsets = self.get_formset()
+
+        if form.is_valid():
+            if formsets.is_valid():
+                return self.formset_valid(form, formsets)
+            else:
+                return self.formset_invalid(form, formsets)
+        else:
+            return self.formset_invalid(form, formsets)
+
+    def formset_valid(self, form, formsets):
+        edulevel_list = []
+        school = form.cleaned_data.get('school')
+
+        # 졸업한 학교 리스트로 변경
+        for formset in formsets:
+            edulevel = formset.cleaned_data.get('edulevel')
+            # 다니는 학교하고 다를 경우 리스트 값 추가
+            if school != edulevel:
+                edulevel_list.append(edulevel)
+
+        # 리스트 중복 값 제거
+        edulevel_list = list(set(edulevel_list))
+        if None in edulevel_list:
+            edulevel_list.remove(None)
+
+        # 자녀 데이터 모델에 저장
+        child = form.save(commit=False)
+        child.parent = self.get_parent()
+        child.save()
+
+        # 재학중인 학력 데이터 저장
+        now_edulevel = EduLevel(
+            school=child.school,
+            status="재학중",
+            child=child
+        )
+        now_edulevel.save()
+
+        # 졸업한 학력 데이터 저장
+        for edulevel in edulevel_list:
+            finish_edulevel = EduLevel(
+                school=edulevel,
+                status="졸업",
+                child=child
+            )
+            finish_edulevel.save()
+
+        return redirect('user:update_parent')
+
+    def formset_invalid(self, form, formsets):
+        context = {
+            'form': form,
+            'formsets': formsets,
+            'parents': self.get_parent()
+        }
+        return self.render_to_response(context)
+
+
+class ChildUpdateView(UpdateView, LoginRequiredMixin):
+    model = Child
+    form_class = ChildForm
+    context_object_name = 'child'
+    template_name = "user/mypage/update_child.html"
+    success_url = reverse_lazy('user:update_parent')
+
+    def get_parent(self):
+        return get_object_or_404(Parent, pk=self.request.user.pk)
+
+    def get_edu_level(self):
+        child = self.get_object()
+        edu_level = EduLevel.objects.filter(child_id=child.pk) \
+            .exclude(status='재학중')
+
+        return edu_level
+
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        kwargs.update({
+            'parent': self.get_parent(),
+            'edu_levels': self.get_edu_level()
+        })
+        return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+class ChildDeleteView(RedirectView):
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        child = get_object_or_404(Child, id=pk)
+
+        child.delete()
+        return HttpResponseRedirect(reverse_lazy('user:update_parent'))
+
+
+class ChildEduLevelCreateView(FormView, LoginRequiredMixin):
+    form_class = EduLevelForm
+    template_name = "user/mypage/create_child_edulevel.html"
+    success_url = 'user:update_child'
+
+    def get_child(self):
+        pk = self.kwargs['pk']
+        return get_object_or_404(Child, pk=pk)
+
+    def get_parent(self):
+        return get_object_or_404(Parent, pk=self.request.user.pk)
+
+    def get(self, requset, *args, **kwargs):
+        kwargs.update({'parent': self.get_parent()})
+        return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+
+    def form_valid(self, form):
+        child = self.get_child()
+        edulevel = form.create_edulevel()
+        edulevel.child = child
+        edulevel.save()
+
+        return HttpResponseRedirect(reverse_lazy(self.success_url, kwargs={'pk': child.pk}))
+
+
+class ChildEduLevelUpdateView(FormView, LoginRequiredMixin):
+    form_class = EduLevelForm
+    template_name = "user/mypage/update_child_edulevel.html"
+    success_url = 'user:update_child'
+
+    def get_initial(self):
+        edu_level = self.get_edu_level()
+
+        self.initial = {
+            'edulevel': edu_level.school
+        }
+        return super().get_initial()
+
+    def get_edu_level(self):
+        pk = self.kwargs['pk']
+        return get_object_or_404(EduLevel, pk=pk)
+
+    def get_parent(self):
+        return get_object_or_404(Parent, pk=self.request.user.pk)
+
+    def get(self, requset, *args, **kwargs):
+        kwargs.update({'parent': self.get_parent()})
+        return render(self.request, self.template_name, self.get_context_data(**kwargs))
+
+    def form_valid(self, form):
+        edu_level = self.get_edu_level()
+        edu_level.school = form.cleaned_data.get('edulevel')
+        child = edu_level.child
+        edu_level.save()
+
+        return HttpResponseRedirect(reverse_lazy(self.success_url, kwargs={'pk': child.pk}))
+
+
+class ChildEdulevelDeleteView(RedirectView):
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        edu_level = get_object_or_404(EduLevel, pk=pk)
+        child = edu_level.child
+        edu_level.delete()
+        return HttpResponseRedirect(reverse_lazy('user:update_child', kwargs={'pk': child.pk}))
 
 # 학생 학력 수정 뷰
 class EduLevelUpdateView(View, LoginRequiredMixin):

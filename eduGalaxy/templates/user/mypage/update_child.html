@@ -1,0 +1,70 @@
+{% extends 'user/mypage/update_base.html' %}
+
+{% block mypage_gbody %}
+<form name="Child_Form" class="form-horizontal" action="." method="post"> {% csrf_token %}
+    <div class="panel panel-success">
+        <div class="panel-heading">자녀 정보 변경</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-2">{{ form.school.label_tag }}</div>
+                <div class="col-sm-6">{{ form.school }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">{{ form.grade.label_tag }}</div>
+                <div class="col-sm-6">{{ form.grade }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">{{ form.age.label_tag }}</div>
+                <div class="col-sm-6">{{ form.age }}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">{{ form.gender.label_tag }}</div>
+                <div class="col-sm-6">
+                    {% for radio in form.gender %}
+                        {{ radio.tag }}
+                        <label for="value_{{ forloop.counter0 }}">{{ radio.choice_label }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">졸업 학교 목록
+            <a href="{% url 'user:create_child_edulevel' pk=child.pk %}">
+                <button type="button" class="btn btn-primary">+</button>
+            </a>
+        </div>
+        <div class="panel-body">
+             <table class="table table-striped">
+                 <thead>
+                     <tr>
+                        <th>학교</th>
+                        <th>비고</th>
+                     </tr>
+                 </thead>
+                 {% for edu_level in edu_levels %}
+                 <tbody>
+                     <tr>
+                        <td>{{ edu_level.school }}</td>
+                        <td>
+                            <a href="{% url 'user:update_child_edulevel' pk=edu_level.pk %}">
+                                <button type="button" class="btn btn-primary btn-xs" name="edulevel_update">변경</button>
+                            </a>
+                            <a href="{% url 'user:delete_child_edulevel' pk=edu_level.pk %}">
+                                <button type="button" class="btn btn-danger btn-xs" name="edulevel_delete">제거</button>
+                            </a>
+                        </td>
+                     </tr>
+                 </tbody>
+                 {% endfor %}
+            </table>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-primary" name="next" type="submit">변경</button>
+        <button type="button" class="btn btn-danger" onclick="history.back(-1);">뒤로</button>
+    </div>
+</form>
+{% endblock mypage_gbody %}

@@ -1,0 +1,62 @@
+{% extends 'user/mypage/update_base.html' %}
+{% load static %}
+
+{% block mypage_gbody %}
+<form name="Child_Form" class="form-horizontal" action="." method="post"> {% csrf_token %}
+    <div class="panel panel-success">
+        <div class="panel-heading">자녀 정보 입력</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-2">{{ form.school.label_tag }}</div>
+                <div class="col-sm-6">{{ form.school }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">{{ form.grade.label_tag }}</div>
+                <div class="col-sm-6">{{ form.grade }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">{{ form.age.label_tag }}</div>
+                <div class="col-sm-6">{{ form.age }}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">{{ form.gender.label_tag }}</div>
+                <div class="col-sm-6">
+                    {% for radio in form.gender %}
+                        {{ radio.tag }}
+                        <label for="value_{{ forloop.counter0 }}">{{ radio.choice_label }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-success">
+        <div class="panel-heading">자녀 학력 입력</div>
+        <div class="panel-body">
+            {{ formsets.management_form }}
+            {% for formset in formsets %}
+            <div class="row form-row spacer">
+                <div class="col-xs-2">
+                    {{ formset.edulevel.label_tag }}
+                </div>
+                <div class="col-xs-4">
+                    <div class="input-group">
+                        <div class="input-group-append">
+                            {{ formset.edulevel }}
+                            <button type="button" class="btn btn-success add-form-row">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-primary" name="next" type="submit">확인</button>
+        <button type="button" class="btn btn-danger" onclick="history.back(-1);">뒤로</button>
+    </div>
+</form>
+<script src="https://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="{% static 'user/js/childformset.js' %}" type="text/javascript"></script>
+{% endblock mypage_gbody %}

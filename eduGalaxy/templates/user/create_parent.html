@@ -1,84 +1,80 @@
 {% extends 'user/base.html' %}
 {% load static %}
 
-<head>
-<meta charset="utf-8" />
 {% block head_title %}
 <title>Sign Up</title>
 {% endblock head_title %}
-</head>
+
 {% block content %}
-<div class="container">
-    <h3>학부모 정보 입력</h3>
-    <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <a href="{% url 'user:add_child' pk=pk %}">
-                    <button type="button" class="btn btn-success">자녀 정보 추가</button>
-                </a>
-            </div>
-            <div class="panel-body">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>다니는 학교</th>
-                        <th>학년</th>
-                        <th>나이</th>
-                        <th>성별</th>
-                        <th>비고</th>
-                    </tr>
-                    </thead>
-                    {% for child in children %}
-                    <tbody>
-                    <tr>
-                        <td>{{ child.school }}</td>
-                        <td>{{ child.grade }}</td>
-                        <td>{{ child.age }}</td>
-                        <td>{{ child.gender }}</td>
-                        <td><a href="{% url 'user:temp_child_delete' pk=child.pk %}">
-                            <button type="button" class="btn btn-danger btn-xs" name="child_delete">제거</button>
-                        </a></td>
-                    </tr>
-                    </tbody>
-                    {% endfor %}
-                </table>
-
-
-            </div>
-        </div>
-        <div class="panel panel-primary">
-            <div class="panel-heading">주소 입력</div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-sm-2">
-                        {{ form.address1.label_tag }}
-                    </div>
-                    <div class="col-sm-6">
-                        {{ form.address1 }}
-                        <input type="button" onclick="address_search()" class="btn btn-success" value="주소 검색">
-                    </div>
+<form name="Parent_Form" action="." method="POST">{% csrf_token %}
+    <div class="container">
+        <h3>학부모 정보 입력</h3>
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="{% url 'user:add_temp_child' pk=pk %}">
+                        <button type="button" class="btn btn-success">자녀 정보 추가</button>
+                    </a>
                 </div>
-                <div class="row">
-                    <div class="col-sm-2">
-                        {{ form.address2.label_tag }}
-                    </div>
-                    <div class="col-sm-6">
-                        {{ form.address2 }}
-                    </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>다니는 학교</th>
+                            <th>학년</th>
+                            <th>나이</th>
+                            <th>성별</th>
+                            <th>비고</th>
+                        </tr>
+                        </thead>
+                        {% for child in children %}
+                        <tbody>
+                        <tr>
+                            <td>{{ child.school }}</td>
+                            <td>{{ child.grade }}</td>
+                            <td>{{ child.age }}</td>
+                            <td>{{ child.gender }}</td>
+                            <td><a href="{% url 'user:delete_temp_child' pk=child.pk %}">
+                                <button type="button" class="btn btn-danger btn-xs" name="child_delete">제거</button>
+                            </a></td>
+                        </tr>
+                        </tbody>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
+            <div class="panel panel-primary">
+                <div class="panel-heading">주소 입력</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            {{ form.address1.label_tag }}
+                        </div>
+                        <div class="col-sm-6">
+                            {{ form.address1 }}
+                            <input type="button" onclick="address_search()" class="btn btn-success" value="주소 검색">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            {{ form.address2.label_tag }}
+                        </div>
+                        <div class="col-sm-6">
+                            {{ form.address2 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" name="next" type="submit">다음</button>
+            <a href="{% url 'user:temp_delete' pk=pk %}">
+                <button type='button' class="btn btn-danger" name="cancel">취소</button>
+            </a>
         </div>
     </div>
-    <div class="form-actions">
-        <button class="btn btn-primary" name="next" type="submit">다음</button>
-        <a href="{% url 'user:temp_delete' pk=pk %}">
-            <button type='button' class="btn btn-danger" name="cancel">취소</button>
-        </a>
-    </div>
-</div>
-
+</form>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<!--<script src="https://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>-->
 <script src="{% static 'user/js/sign_up.js' %}" type="text/javascript"></script>
 {% endblock content %}
 

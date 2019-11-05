@@ -1,0 +1,19 @@
+{% extends 'user/mypage/update_base.html' %}
+
+{% block mypage_gbody %}
+<form name="create_child_edulevel_form" action="." method="post">{% csrf_token %}
+    <div class="panel panel-primary">
+        <div class="panel-heading">졸업 학교 추가</div>
+        <div class="panel-body">
+             <div class="row">
+                <div class="col-sm-2">{{ form.edulevel.label_tag }}</div>
+                <div class="col-sm-6">{{ form.edulevel }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-primary" name="next" type="submit">추가</button>
+        <button type="button" class="btn btn-danger" onclick="history.back(-1);">뒤로</button>
+    </div>
+</form>
+{% endblock mypage_gbody %}

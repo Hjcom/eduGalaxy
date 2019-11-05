@@ -8,27 +8,34 @@ function updateElementIndex(el, prefix, ndx) {
 function cloneMore(selector, prefix) {
     var newElement = $(selector).clone(true);
     var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
-    newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
-        var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
-        var id = 'id_' + name;
-        $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
-    });
-    newElement.find('label').each(function() {
-        var forValue = $(this).attr('for');
-        if (forValue) {
-          forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
-          $(this).attr({'for': forValue});
-        }
-    });
-    total++;
-    $('#id_' + prefix + '-TOTAL_FORMS').val(total);
-    $(selector).after(newElement);
-    var conditionRow = $('.form-row:not(:last)');
-    conditionRow.find('.btn.add-form-row')
-    .removeClass('btn-success').addClass('btn-danger')
-    .removeClass('add-form-row').addClass('remove-form-row')
-    .html('<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>');
-    return false;
+
+    if (total < 7){
+        newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+            var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        });
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+              forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+              $(this).attr({'for': forValue});
+            }
+        });
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+        var conditionRow = $('.form-row:not(:last)');
+        conditionRow.find('.btn.add-form-row')
+        .removeClass('btn-success').addClass('btn-danger')
+        .removeClass('add-form-row').addClass('remove-form-row')
+        .html('<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>');
+        return false;
+    }
+    else {
+        alert('더는 추가할 수 없습니다.')
+    }
+
 }
 function deleteForm(prefix, btn) {
     var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());

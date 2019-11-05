@@ -4,7 +4,7 @@ from django.forms import formset_factory
 from django.utils.translation import ugettext as _
 
 from apps.user.models import EdUser, Temp, TempChild, Log, Profile
-from apps.user.models import SchoolAuth, Student, Parent, Child
+from apps.user.models import SchoolAuth, Student, Parent, Child, EduLevel
 
 EMAIL_LIST = (
     ("select", "선택하세요"),
@@ -191,7 +191,7 @@ class StudentCreationForm(forms.Form):
         return student
 
 
-class ParentCreationForm(forms.ModelForm):
+class ParentForm(forms.ModelForm):
     class Meta:
         model = Parent
         fields = ('address1', 'address2')
@@ -202,52 +202,42 @@ class ParentCreationForm(forms.ModelForm):
         self.fields['address2'].widget.attrs = {'id': 'address2'}
 
 
-class ChildCreationForm(forms.Form):
-    school = forms.CharField(label='다니는 학교', widget=forms.TextInput)
+class ChildForm(forms.ModelForm):
+    class Meta:
+        # grade choice list 정의
+        grade_list = range(0, 7)
+        GRADE = []
+        for grade in grade_list:
+            if grade == 0:
+                GRADE.append([grade, " "])
+            else:
+                GRADE.append([grade, str(grade)])
 
-    grade_list = range(0, 7)
-    GRADE = []
-    for grade in grade_list:
-        if grade == 0:
-            GRADE.append([grade, " "])
-        else:
-            GRADE.append([grade, str(grade)])
+        # age choice list 정의
+        age_list = range(0, 101)
+        AGE_CONTROL = []
+        for age in age_list:
+            if age == 0:
+                AGE_CONTROL.append([age, " "])
+            else:
+                AGE_CONTROL.append([age, str(age)])
 
-    grade = forms.CharField(widget=forms.Select(
-        choices=tuple(GRADE),
-        attrs={'name': 'grade'},
-        ),
-        label='학년'
-    )
+        model = Child
+        fields = ('school', 'grade', 'age', 'gender')
+        labels = {
+            'school': '다니는 학교',
+            'grade' : '학년',
+            'age'   : '나이',
+            'gender': '성별'
+        }
+        widgets = {
+            'grade': forms.Select(choices=tuple(GRADE), attrs={'name': 'grade'}),
+            'age': forms.Select(choices=tuple(AGE_CONTROL), attrs={'name': 'age'}),
+            'gender': forms.RadioSelect(choices=GENDER_LIST, attrs={'style': 'display: inline-block', 'id': 'gender'})
+        }
 
-    # 나이 select 위젯 선언
-    age_list = range(0, 101)
-    AGE_CONTROL = []
-    for age in age_list:
-        if age == 0:
-            AGE_CONTROL.append([age, " "])
-        else:
-            AGE_CONTROL.append([age, str(age)])
-
-    age = forms.CharField(widget=forms.Select(
-        choices=tuple(AGE_CONTROL),
-        attrs={'name': 'age'},
-        ),
-        label='나이'
-    )
-
-    gender = forms.ChoiceField(
-        choices=GENDER_LIST,
-        label='성별',
-        widget=forms.RadioSelect(
-            attrs={
-                'style': 'display: inline-block',
-                'id': 'gender'
-            },
-        )
-    )
-
-    def child_data(self):
+    # 자녀 정보 추가
+    def create_child(self):
         child = TempChild(
             school=self.cleaned_data.get('school'),
             grade=self.cleaned_data.get('grade'),
@@ -267,6 +257,16 @@ class EduLevelForm(forms.Form):
             }
         )
     )
+
+    def create_edulevel(self):
+        edulevel = EduLevel(
+            school=self.cleaned_data.get('edulevel'),
+            status="졸업"
+        )
+        return edulevel
+
+
+
 EduLevelFormset = formset_factory(EduLevelForm, extra=1)
 
 
