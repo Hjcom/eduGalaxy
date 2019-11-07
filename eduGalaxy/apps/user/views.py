@@ -48,11 +48,11 @@ class EdUserCreateView(FormView):
         # non_field_error() : error 메시지만 리턴
         error_data = form.non_field_errors()
         form = self.form_class(initial=self.initial)
-        context = {
-            'form': form,
-            'error_msg': error_data
-        }
-        return render(self.request, self.template_name, context)
+
+        messages.add_message(self.request, messages.ERROR, error_data)
+        messages.error(self.request, error_data, extra_tags='update_error')
+
+        return render(self.request, self.template_name, {'form': form})
 
 
 # 사용자 계정 세부내용

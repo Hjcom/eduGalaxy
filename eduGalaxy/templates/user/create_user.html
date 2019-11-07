@@ -7,39 +7,62 @@
 
 {% block content %}
 <script src="{% static 'user/js/sign_up.js' %}" type="text/javascript"></script>
-<div class="panel panel-default registration">
-    <div class="panel-heading">
-        <h1 align="center">회원 가입</h1>
-    </div>
-
-    {% include 'user/social/social_login_panel.html' with panel_name="소셜회원가입" %}
-
-    <div class="panel-body">
-        <form name="Signup_Form" action="." method="post"> {% csrf_token %}
-            {% if error_msg %}
-                {{ error_msg }}
-            {% endif %}
-            <table>
-                <tr>
-                    <td>{{ form.email1.label_tag }}</td>
-                    <td>{{ form.email1 }} &nbsp; @ &nbsp;</td>
-                    <td>{{ form.email2 }}</td>
-                    <td>{{ form.select_email }}</td>
-                </tr>
-                <tr>
-                    <td>{{ form.password1.label_tag }}</td>
-                    <td>{{ form.password1 }}</td>
-                </tr>
-                <tr>
-                    <td>{{ form.password2.label_tag }}</td>
-                    <td>{{ form.password2 }}</td>
-                </tr>
-            </table>
-            <div class="form-actions">
+<br><h1 align="center">회원 가입</h1>
+<div class="container">
+{% include 'user/social/social_login_panel.html' with panel_name="소셜회원가입" %}
+</div>
+<br>
+<div class="container">
+    <form name="Signup_Form" action="." method="post"> {% csrf_token %}
+        {% for message in messages %}
+        <div class="row">
+            <div class="col-md-10">
+                <div class="alert alert-danger">{{ message }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">이메일</span>
+                    </div>
+                    {{ form.email1 }}
+                    <span class="input-group-text">@</span>
+                    {{ form.email2 }}
+                    {{ form.select_email }}
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">비밀번호</span>
+                    </div>
+                    {{ form.password1 }}
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">비밀번호 확인</span>
+                    </div>
+                    {{ form.password2 }}
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
                 <button class="btn btn-primary" type="submit">다음</button>
                 <button class="btn btn-danger" onclick="history.back(-1);">취소</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 {% endblock content %}
