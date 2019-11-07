@@ -12,28 +12,26 @@
 <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
 <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 
-<div class="panel panel-default user-panel">
-    <div class="panel-heading">
+<div class="card">
+    <div class="card-header">
         {{ panel_name }}
     </div>
-    <div class="panel-body text-center">
-        <div class="pull">
-            <a href="#" id="loginBtn" value="checking..." onclick="googleLogin()">
-                <img src="{{ google_button }}"
-                         onmouseover="this.src='{{ google_button_hover }}'"
-                         onmouseleave="this.src='{{ google_button }}'" height="39">
-            </a>
-            <a href="#" id="custom-login-btn" value="checking..." onclick="kakaoLogin()">
-                <img src="{{ kakao_button }}"
-                     onmouseover="this.src='{{ kakao_button_hover }}'"
-                     onmouseleave="this.src='{{ kakao_button }}'" height="35">
-            </a>
-            <a href="#" onclick="naverLogin()">
-                <img src="{{ naver_button }}"
-                     onmouseover="this.src='{{ naver_button_hover }}'"
-                     onmouseleave="this.src='{{ naver_button }}'" height="34">
-            </a>
-        </div>
+    <div class="card-block text-center">
+        <a href="#" id="loginBtn" value="checking..." onclick="googleLogin()">
+            <img src="{{ google_button }}"
+                     onmouseover="this.src='{{ google_button_hover }}'"
+                     onmouseleave="this.src='{{ google_button }}'" height="39">
+        </a>
+        <a href="#" id="custom-login-btn" value="checking..." onclick="kakaoLogin()">
+            <img src="{{ kakao_button }}"
+                 onmouseover="this.src='{{ kakao_button_hover }}'"
+                 onmouseleave="this.src='{{ kakao_button }}'" height="35">
+        </a>
+        <a href="#" onclick="naverLogin()">
+            <img src="{{ naver_button }}"
+                 onmouseover="this.src='{{ naver_button_hover }}'"
+                 onmouseleave="this.src='{{ naver_button }}'" height="34">
+        </a>
     </div>
 </div>
 

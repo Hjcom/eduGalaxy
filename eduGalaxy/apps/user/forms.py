@@ -36,6 +36,7 @@ class EdUserCreationForm(forms.Form):
             attrs={
                 'autofocus': 'autofocus',
                 'required': 'required',
+                'class': 'form-control',
             }),
         label='이메일'
     )
@@ -44,6 +45,7 @@ class EdUserCreationForm(forms.Form):
             attrs={
                 'id': 'user_email2',
                 'disabled': 'disabled',
+                'class': 'form-control',
             })
     )
 
@@ -52,19 +54,25 @@ class EdUserCreationForm(forms.Form):
         choices=EMAIL_LIST,
         attrs={
                 'id': 'select',
-                'onchange': 'Change_Email();'}
+                'onchange': 'Change_Email();',
+                'class': 'form-control',
+            }
         )
     )
 
     password1 = forms.CharField(
         label=_("비밀번호"),
         strip=False,
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control'}
+        ),
     )
     password2 = forms.CharField(
         label=_("비밀번호 확인"),
         strip=False,
-        widget=forms.PasswordInput
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control'}
+        ),
     )
 
     # 폼 유효성 검사
@@ -264,7 +272,6 @@ class EduLevelForm(forms.Form):
             status="졸업"
         )
         return edulevel
-
 
 
 EduLevelFormset = formset_factory(EduLevelForm, extra=1)

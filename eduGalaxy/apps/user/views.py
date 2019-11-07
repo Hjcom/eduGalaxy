@@ -48,11 +48,11 @@ class EdUserCreateView(FormView):
         # non_field_error() : error 메시지만 리턴
         error_data = form.non_field_errors()
         form = self.form_class(initial=self.initial)
-        context = {
-            'form': form,
-            'error_msg': error_data
-        }
-        return render(self.request, self.template_name, context)
+
+        messages.add_message(self.request, messages.ERROR, error_data)
+        messages.error(self.request, error_data, extra_tags='update_error')
+
+        return render(self.request, self.template_name, {'form': form})
 
 
 # 사용자 계정 세부내용
@@ -449,6 +449,7 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
 
     def get_object(self):
         profile = get_object_or_404(Profile, pk=self.request.user.pk)
+        print(profile)
 
         return profile
 
@@ -508,6 +509,12 @@ class ParentUpdateView(UpdateView, LoginRequiredMixin):
     context_object_name = 'parent'
     template_name = 'user/mypage/update_parent.html'
     success_url = reverse_lazy('user:update_profile')
+
+    def get_object(self):
+        parent = get_object_or_404(Parent, pk=self.request.user.pk)
+
+        return parent
+
 
     def get_child(self):
         self.kwargs.update({'pk': self.request.user.pk})
@@ -622,7 +629,6 @@ class ChildUpdateView(UpdateView, LoginRequiredMixin):
             .exclude(status='재학중')
 
         return edu_level
-
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
