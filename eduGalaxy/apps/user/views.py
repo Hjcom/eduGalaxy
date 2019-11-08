@@ -31,17 +31,12 @@ class EdUserCreateView(FormView):
     form_class = EdUserCreationForm
     template_name = 'user/create_user.html'
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        context = {'form': form}
-        return render(request, self.template_name, context)
-
+    # 폼 유효성 검사 후 호출
     def form_valid(self, form):
         temp = form.save(commit=False)
         temp.create_date = timezone.now()
         temp.save()
-        eduser_id = temp.id
-        return HttpResponseRedirect(reverse_lazy('user:profile', kwargs={'pk': eduser_id}))
+        return HttpResponseRedirect(reverse_lazy('user:profile', kwargs={'pk': temp.id}))
 
     # validation error 시 필드값 초기화 및 에러 메시지 호출
     def form_invalid(self, form):
@@ -49,8 +44,7 @@ class EdUserCreateView(FormView):
         error_data = form.non_field_errors()
         form = self.form_class(initial=self.initial)
 
-        messages.add_message(self.request, messages.ERROR, error_data)
-        messages.error(self.request, error_data, extra_tags='update_error')
+        messages.error(self.request, error_data, extra_tags='create_eduser')
 
         return render(self.request, self.template_name, {'form': form})
 
@@ -60,22 +54,20 @@ class ProfileCreateView(FormView):
     form_class = ProfileCreationForm
     template_name = 'user/create_profile.html'
 
+    # url로 보낸 객체 번호를 호출 (Temp)
     def get_object(self):
         pk = self.kwargs['pk']
         return get_object_or_404(Temp, id=pk)
 
+    # temp_delete url에 temp의 pk가 필요하므로 이렇게 구현
     def get(self, request, *args, **kwargs):
         return render(self.request, self.template_name, self.get_context_data(**kwargs))
 
-    def post(self, request, *args, **kwargs):
-        print(request.POST)
-        return super().post(request, *args, **kwargs)
-
     def form_valid(self, form):
         temp = self.get_object()
+        group = form.cleaned_data.get('group')
+
         data = form.profile_data()
-        group = self.request.POST['group']
-        pk = temp.id
 
         temp.profile = data
         temp.create_date = timezone.now()
@@ -88,7 +80,24 @@ class ProfileCreateView(FormView):
         elif group == "학부모":
             nexturl = 'user:parent'
 
-        return HttpResponseRedirect(reverse_lazy(nexturl, kwargs={'pk': pk}))
+        return HttpResponseRedirect(reverse_lazy(nexturl, kwargs={'pk': temp.id}))
+
+    def form_invalid(self, form):
+        temp = self.get_object()
+
+        error_data = form.non_field_errors()
+        self.initial = {
+            'group': 'select'
+        }
+        form = self.form_class(initial=self.initial)
+        context = {
+            'form': form,
+            'pk': temp.id
+        }
+
+        messages.error(self.request, error_data, extra_tags='create_profile')
+
+        return render(self.request, self.template_name, context)
 
 
 # 사용자 - 학생 정보 입력

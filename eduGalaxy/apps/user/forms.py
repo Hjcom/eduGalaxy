@@ -92,7 +92,7 @@ class EdUserCreationForm(forms.Form):
 
         return super().clean()
 
-    # cleaned_data temp에 저장
+    # temp에 저장하기 전 단계
     def save(self, commit=True):
         email1 = self.cleaned_data.get('email1')
         email2 = self.cleaned_data.get('email2')
@@ -100,7 +100,8 @@ class EdUserCreationForm(forms.Form):
 
         email = email1 + "@" + email2
 
-        eduser = email + "| " + password
+        # eduser data를 temp에 문자열로 저장
+        eduser = email + "|" + password
         temp = Temp(eduser=eduser)
 
         if commit:
@@ -113,28 +114,57 @@ class EdUserCreationForm(forms.Form):
 class ProfileCreationForm(forms.Form):
     group = forms.CharField(widget=forms.Select(
             choices=GROUP_LIST,
-            attrs={'id': 'group'}
+            attrs={
+                'id': 'group',
+                'class': 'form-control',
+            }
         ),
         label="직업"
     )
-    phone = forms.CharField(label='핸드폰 번호', widget=forms.TextInput, required=False)
+    phone = forms.CharField(
+        label='핸드폰 번호',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'ex) 010-xxxx-xxxx',
+            }
+        ),
+        required=False
+    )
     receive_email = forms.BooleanField(
         label='이메일 수신 동의',
         required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                'class': 'form-check-input'
+            }
+        )
     )
 
     # 본인인증 여부는 추후 구현 예정(핸드폰 인증/이메일 인증)
     # phone 필드는 수정이 필요한 부분
+
+    def clean(self):
+        cleaned_data = super().clean()
+        group = cleaned_data.get('group')
+
+        if group == "select":
+            raise forms.ValidationError("직업을 선택하셔야 합니다.")
+
+        return super().clean()
+
     def profile_data(self):
         group = self.cleaned_data.get('group')
         phone = self.cleaned_data.get('phone')
         receive_email = self.cleaned_data.get('receive_email')
 
         if receive_email:
-            data = group + "| " + phone + "| " + "True"
+            data = group + "|" + phone + "|" + "True"
         else:
-            data = group + "| " + phone + "| " + "False"
+            data = group + "|" + phone + "|" + "False"
         return data
+
+
 
 
 class StudentCreationForm(forms.Form):
